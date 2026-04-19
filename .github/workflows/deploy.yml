@@ -33,6 +33,9 @@ jobs:
 
       - name: setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # Auto-create the Pages site on first run instead of 404ing.
+          enablement: true
 
       - name: verify site structure
         # Fail fast if the three required files aren't present so a
