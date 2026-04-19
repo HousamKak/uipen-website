@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="color-scheme" content="dark" />
 <title>UIpen — Point at your app. Claude fixes it.</title>
-<meta name="description" content="A dev-mode annotation layer for React, Next, Astro, Vue, and Svelte. Point at the thing that's off, multi-select a cluster, ask for knobs. It flows straight into Claude Code with the source file and line. $29 one-time. No cloud, no accounts." />
+<meta name="description" content="A dev-mode annotation layer for React, Next, Astro, Vue, and Svelte. Point at the thing that's off, multi-select a cluster, ask for knobs. It flows straight into Claude Code with the source file and line. Beta — $15 early-adopter price (full $29). No cloud, no accounts." />
 <meta property="og:title" content="UIpen — Point at your app. Claude fixes it." />
-<meta property="og:description" content="Dev-mode annotation layer that pipes visual feedback straight into your Claude Code session via Anthropic Channels. Source-aware edits, token-aware knobs, LIFO revert, per-annotation chat threads. $29 one-time." />
+<meta property="og:description" content="Dev-mode annotation layer that pipes visual feedback straight into your Claude Code session via Anthropic Channels. Source-aware edits, token-aware knobs, LIFO revert, per-annotation chat threads. Beta — $15 early adopter." />
 <meta property="og:type" content="website" />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 <link rel="stylesheet" href="styles.css" />
@@ -101,7 +101,7 @@
     </nav>
     <div class="cta-group">
       <button class="chaos-btn" id="chaosBtn" aria-pressed="false"><svg width="10" height="10" style="vertical-align:-1px;margin-right:6px"><use href="#i-zap"/></svg>Chaos</button>
-      <a class="btn primary sm" href="#pricing">Buy $29 <svg><use href="#i-arrow-right"/></svg></a>
+      <a class="btn primary sm" href="#pricing">Get beta — $15 <svg><use href="#i-arrow-right"/></svg></a>
     </div>
     <button class="nav-toggle" aria-label="Toggle menu" id="navToggle"><svg width="18" height="18"><use href="#i-menu"/></svg></button>
   </div>
@@ -112,6 +112,7 @@
   <div class="container">
     <div class="term-prompt reveal">
       <span class="arrow">&gt;</span> <span id="typed">UIpen_$ init</span> <span class="blink"></span>
+      <span class="beta-pill">BETA</span>
     </div>
     <h1 class="reveal">
       <span class="l">Point at your app.</span>
@@ -122,10 +123,11 @@
     </p>
 
     <div class="cta-row reveal">
-      <a class="btn primary magnetic" href="#pricing">Buy — $29 one-time <svg><use href="#i-arrow-right"/></svg></a>
+      <a class="btn primary magnetic" href="#pricing">Get beta access — $15 <svg><use href="#i-arrow-right"/></svg></a>
       <a class="btn ghost magnetic" href="#how">See how it works</a>
       <div class="keys"><span>tools:</span> <kbd>P</kbd> <kbd>R</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>K</kbd> <kbd>H</kbd></div>
     </div>
+    <p class="hero-price-line reveal">Early-adopter price during beta &middot; <del>$29</del> <strong>$15 one-time</strong> &middot; Full price at 1.0</p>
 
     <div class="hero-demo reveal">
       <div class="hud">
@@ -331,32 +333,35 @@
 <section id="pricing">
   <div class="container">
     <div class="eyebrow reveal">03 // Pricing</div>
-    <h2 class="reveal">One price.<br/><span class="hl-m">No subscription.</span></h2>
-    <p class="section-lede reveal">Buy once, own it. Every UIpen 1.x update is free for the next 12 months. Upgrade to major versions later for 50% off — or don't; your copy keeps working on the version you bought, forever.</p>
+    <h2 class="reveal">Early-adopter beta.<br/><span class="hl-m">$15 one-time.</span></h2>
+    <p class="section-lede reveal">UIpen is in beta. Pay $15 now, lock in your license for every 1.x update — forever. When 1.0 ships the price rises to $29 for everyone else.</p>
 
     <div class="pricing-grid reveal">
       <div class="price-card">
+        <span class="price-badge">BETA · EARLY ADOPTER</span>
         <div class="price-head">
           <div class="price-tier">UIpen — Personal</div>
-          <div class="price-amount">$29<span class="price-unit"> one-time</span></div>
+          <div class="price-amount"><del class="price-strike">$29</del> $15<span class="price-unit"> one-time</span></div>
         </div>
         <ul class="price-list">
           <li><span class="tick">✓</span> Full UIpen — all tools, all frameworks</li>
-          <li><span class="tick">✓</span> 12 months of free 1.x updates</li>
+          <li><span class="tick">✓</span> Every 1.x update, free forever</li>
           <li><span class="tick">✓</span> 3 machine activations</li>
           <li><span class="tick">✓</span> Works offline after activation</li>
           <li><span class="tick">✓</span> 50% off future major-version upgrades</li>
-          <li><span class="tick">✓</span> Email support on bugs</li>
+          <li><span class="tick">✓</span> Direct email support from the founder</li>
         </ul>
-        <a class="btn primary magnetic price-cta" href="#install">Buy — $29 <svg><use href="#i-arrow-right"/></svg></a>
-        <div class="price-note">Paid via Polar.sh. Secure, instant, worldwide. Refund within 14 days.</div>
+        <a class="btn primary magnetic price-cta" href="https://paypal.me/HousamKak/15USD" target="_blank" rel="noopener">Pay $15 via PayPal <svg><use href="#i-arrow-right"/></svg></a>
+        <div class="price-note">After payment, forward your PayPal receipt to <a href="mailto:housam@uipen.dev">housam@uipen.dev</a> — license key in your inbox within the hour. <a href="/thanks/">What to expect →</a></div>
       </div>
 
       <div class="price-why">
-        <h3>Why one-time, not subscription</h3>
-        <p>Subscription tools go dark when you stop paying. UIpen doesn't. You own the version you bought — forever. When a new major ships (every ~18 months) with meaningful new features, you decide whether to upgrade.</p>
+        <h3>Why $15, and why now</h3>
+        <p>UIpen works and I'm shipping updates fast, but it is literally version 0.1 — expect rough edges, expect rapid iteration. The $15 beta price is a thank-you for buying in early and putting up with the dust. Your license covers every 1.x release; nothing to renew, nothing to upgrade.</p>
+        <h3 style="margin-top: 22px">Why PayPal (for now)</h3>
+        <p>Proper checkout with auto-delivery is landing in the next few weeks once the billing entity is set up. Right now, I handle license issuance personally: you pay, I email your key. Low-tech but fast — and you get a direct line to me on any issue you hit.</p>
         <h3 style="margin-top: 22px">Need more than 3 machines?</h3>
-        <p>Team and enterprise licenses (site-wide seat counts, SSO, priority support) ship later in 2026. <a href="mailto:hi@uipen.dev">Email for early access.</a></p>
+        <p>Team and enterprise licenses ship later in 2026. <a href="mailto:housam@uipen.dev">Email for early access.</a></p>
       </div>
     </div>
   </div>
@@ -414,7 +419,7 @@
       </a>
     </div>
     <p class="dl-meta reveal">
-      Buy your license at <a href="#pricing">$29 one-time</a>. Already bought? Your same license activates every download — grab the latest anytime.
+      Beta pricing: <a href="#pricing">$15 one-time</a> during the 0.x series (full price $29 at 1.0). Already bought? Your same license activates every download — grab the latest anytime.
     </p>
 
     <!-- After install -->
@@ -465,9 +470,9 @@ uipen init</code></pre>
   <div class="container">
     <div class="reveal">
       <h2>Stop pointing at pixels.<br/>Start pointing at <span class="hl-m">code.</span></h2>
-      <p>$29 one-time. 12 months of updates. Works in React, Next, Astro, Vue, Svelte.</p>
+      <p>Beta — $15 one-time (<del>$29</del> at 1.0). React, Next, Astro, Vue, Svelte. No cloud, no accounts.</p>
       <div class="cta-line">
-        <a class="btn primary magnetic" href="#pricing">Buy — $29 <svg><use href="#i-arrow-right"/></svg></a>
+        <a class="btn primary magnetic" href="#pricing">Get beta — $15 <svg><use href="#i-arrow-right"/></svg></a>
         <a class="btn ghost magnetic" href="#install">Download</a>
       </div>
     </div>
@@ -486,7 +491,7 @@ uipen init</code></pre>
       <a href="#features">Features</a>
       <a href="#pricing">Pricing</a>
       <a href="#install">Download</a>
-      <a href="mailto:hi@uipen.dev">Contact</a>
+      <a href="mailto:housam@uipen.dev">Contact</a>
     </div>
   </div>
 </footer>

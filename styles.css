@@ -1892,6 +1892,69 @@ body.chaos-forever {
 }
 
 /* ================================================================
+   BETA badge + early-adopter price treatment
+   ================================================================ */
+.beta-pill {
+  display: inline-block;
+  margin-left: 14px;
+  padding: 2px 10px;
+  font: 700 10px 'JetBrains Mono', monospace;
+  letter-spacing: 0.18em;
+  color: #BFFF00;
+  background: rgba(191, 255, 0, 0.08);
+  border: 1px solid rgba(191, 255, 0, 0.35);
+  border-radius: 2px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+.hero-price-line {
+  margin: 14px 0 0;
+  font: 500 13px 'JetBrains Mono', monospace;
+  color: var(--fg-dim);
+  letter-spacing: 0.02em;
+}
+.hero-price-line del {
+  color: var(--fg-ghost);
+  text-decoration-thickness: 1.5px;
+  margin: 0 2px;
+}
+.hero-price-line strong {
+  color: #BFFF00;
+  font-weight: 600;
+}
+.price-card {
+  position: relative;
+}
+.price-badge {
+  position: absolute;
+  top: -10px;
+  left: 18px;
+  padding: 3px 10px;
+  font: 700 10px 'JetBrains Mono', monospace;
+  letter-spacing: 0.18em;
+  color: #BFFF00;
+  background: var(--void);
+  border: 1px solid rgba(191, 255, 0, 0.4);
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+.price-strike {
+  color: var(--fg-ghost);
+  font-weight: 400;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--fg-ghost);
+  margin-right: 6px;
+  font-size: 0.72em;
+  vertical-align: 4px;
+}
+.price-note a {
+  color: var(--accent-hot);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.price-note a:hover { color: #BFFF00; }
+
+/* ================================================================
    CHANGELOG PAGE — /changelog/
    Minimal chrome, focused reading column, shares tokens with the
    main marketing page via styles.css.
