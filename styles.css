@@ -1890,3 +1890,180 @@ body.chaos-forever {
   border: 1px solid var(--border-strong);
   border-radius: 2px;
 }
+
+/* ================================================================
+   CHANGELOG PAGE — /changelog/
+   Minimal chrome, focused reading column, shares tokens with the
+   main marketing page via styles.css.
+   ================================================================ */
+body.cl-page {
+  background: var(--void);
+  color: var(--fg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.cl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  max-width: 920px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.cl-header .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--fg);
+  text-decoration: none;
+  font: 600 14px var(--font-mono, 'JetBrains Mono', monospace);
+  letter-spacing: 0.06em;
+}
+.cl-header .brand .logo-mark { width: 24px; height: 24px; display: inline-flex; }
+.cl-header .brand .logo-mark svg { width: 100%; height: 100%; }
+.cl-back {
+  color: var(--fg-dim);
+  text-decoration: none;
+  font: 500 13px var(--font-mono, 'JetBrains Mono', monospace);
+}
+.cl-back:hover { color: var(--accent-hot); }
+
+.cl-main {
+  flex: 1;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 64px 32px 80px;
+  box-sizing: border-box;
+}
+.cl-title {
+  font: 700 42px/1.1 'IBM Plex Sans', sans-serif;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+.cl-lede {
+  color: var(--fg-dim);
+  font-size: 16px;
+  margin: 0 0 48px;
+}
+
+.cl-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+.cl-entry { scroll-margin-top: 32px; }
+.cl-entry-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.cl-entry-head time {
+  color: var(--fg-ghost);
+  font: 500 12px var(--font-mono, 'JetBrains Mono', monospace);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cl-entry-head h2 {
+  flex-basis: 100%;
+  font: 700 24px/1.2 'IBM Plex Sans', sans-serif;
+  margin: 4px 0 0;
+  letter-spacing: -0.01em;
+}
+.cl-entry-head h2 a {
+  color: var(--fg);
+  text-decoration: none;
+}
+.cl-entry-head h2 a:hover { color: var(--accent-hot); }
+
+.cl-tag {
+  display: inline-flex;
+  align-items: center;
+  font: 600 10px var(--font-mono, 'JetBrains Mono', monospace);
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+}
+.cl-tag-release {
+  color: #BFFF00;
+  background: rgba(191, 255, 0, 0.08);
+  border-color: rgba(191, 255, 0, 0.25);
+}
+.cl-tag-post {
+  color: var(--accent-hot);
+  background: var(--accent-soft);
+  border-color: rgba(94, 106, 210, 0.3);
+}
+
+.cl-body {
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.cl-body p { margin: 0 0 16px; }
+.cl-body ul, .cl-body ol { margin: 0 0 16px; padding-left: 24px; }
+.cl-body li { margin-bottom: 6px; }
+.cl-body a { color: var(--accent-hot); text-decoration: underline; text-underline-offset: 3px; }
+.cl-body a:hover { color: #BFFF00; }
+.cl-body code {
+  font: 500 13px 'JetBrains Mono', monospace;
+  background: var(--panel);
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--accent-hot);
+}
+.cl-body pre {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0 0 16px;
+}
+.cl-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--fg);
+}
+.cl-body h3 {
+  font: 600 18px 'IBM Plex Sans', sans-serif;
+  margin: 28px 0 10px;
+  letter-spacing: -0.005em;
+}
+.cl-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+.cl-foot {
+  max-width: 920px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 32px 32px;
+  border-top: 1px solid var(--border);
+  color: var(--fg-dim);
+  font: 500 12px var(--font-mono, 'JetBrains Mono', monospace);
+  letter-spacing: 0.04em;
+  display: flex;
+  gap: 10px;
+  box-sizing: border-box;
+}
+.cl-foot a { color: var(--fg-dim); text-decoration: none; }
+.cl-foot a:hover { color: var(--accent-hot); }
+.cl-foot-sep { color: var(--fg-ghost); }
+
+@media (max-width: 640px) {
+  .cl-header, .cl-main, .cl-foot { padding-left: 20px; padding-right: 20px; }
+  .cl-title { font-size: 32px; }
+  .cl-entry-head h2 { font-size: 20px; }
+}

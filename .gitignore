@@ -6,3 +6,7 @@ node_modules/
 .idea/
 dist/
 tmp/
+# Generated at deploy time by scripts/build-changelog.mjs — source of truth
+# lives in content/changelog/*.md. Rebuilt by CI before the Pages artifact
+# is uploaded.
+/changelog/

@@ -4,7 +4,9 @@ name: deploy
 # Pages serves it from uipen.dev via the CNAME file at the repo root.
 #
 # First run will auto-enable Pages (via actions/configure-pages).
-# No build step — the site is vanilla HTML/CSS/JS and ships as-is.
+# The site is mostly vanilla HTML/CSS/JS; the only build step is
+# `bun run build:changelog`, which turns content/changelog/*.md into
+# /changelog/index.html.
 
 on:
   push:
@@ -47,6 +49,19 @@ jobs:
           test -s CNAME
           echo "site files present:"
           ls -la
+
+      - name: setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: install deps
+        run: bun install --frozen-lockfile || bun install
+
+      - name: build changelog
+        run: |
+          bun run build:changelog
+          test -s changelog/index.html
 
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
