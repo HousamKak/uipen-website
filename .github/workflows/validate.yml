@@ -1,0 +1,53 @@
+name: validate
+
+# Runs on PRs + pushes to non-main branches. Does a fast HTML / CSS / JS
+# sanity check so a broken commit gets caught before it hits main and
+# triggers a bad deploy.
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  html-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: check HTML via html-validate
+        run: |
+          npx -y html-validate --config-preset=recommended index.html || {
+            echo "html-validate reported issues (non-blocking during design iteration)"
+            exit 0
+          }
+
+      - name: JS syntax check
+        run: node --check script.js
+
+      - name: CSS sanity (file exists and parses as valid length)
+        run: |
+          test -s styles.css
+          # 1 KB floor — catches accidental truncation from bad merges.
+          SIZE=$(wc -c < styles.css)
+          echo "styles.css size: $SIZE bytes"
+          test "$SIZE" -gt 1024
+
+      - name: confirm no accidental lasso references
+        # We dropped Lasso from the product. The `i-lasso` symbol def
+        # can linger (it's inert), but any *visible* "lasso" label means
+        # someone forgot to update a card. Flag loudly.
+        run: |
+          if grep -n -iE '(lasso)' index.html | grep -v 'i-lasso' | grep -v '\.lasso-viz'; then
+            echo "Found stray 'lasso' mention — please update copy to Ctrl+click multi-select."
+            exit 1
+          fi

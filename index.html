@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="dark" />
+<title>UIpen — Point at your app. Claude fixes it.</title>
+<meta name="description" content="A dev-mode annotation layer for React, Next, Astro, Vue, and Svelte. Point at the thing that's off, multi-select a cluster, ask for knobs. It flows straight into Claude Code with the source file and line. $29 one-time. No cloud, no accounts." />
+<meta property="og:title" content="UIpen — Point at your app. Claude fixes it." />
+<meta property="og:description" content="Dev-mode annotation layer that pipes visual feedback straight into your Claude Code session via Anthropic Channels. Source-aware edits, token-aware knobs, LIFO revert, per-annotation chat threads. $29 one-time." />
+<meta property="og:type" content="website" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- boot loader -->
+<div id="boot" aria-hidden="true">
+  <div class="boot-lines">
+    <span>[ ok ] uipen.init() — loading shadow DOM adapter...</span>
+    <span>[ ok ] mcp.handshake() — stdio + http/ws on :8787</span>
+    <span>[ ok ] fiber_source_map.ready()</span>
+    <span>[ ok ] channels.subscribe('claude.channel')</span>
+    <span>&gt; READY. POINT AT YOUR APP.</span>
+  </div>
+</div>
+
+<!-- canvas background -->
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- SVG symbol defs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 14.5 C 8 14.5 3 9.5 3 6.3 A 5 5 0 0 1 13 6.3 C 13 9.5 8 14.5 8 14.5 Z"/>
+      <circle cx="8" cy="6.3" r="1.6"/>
+    </symbol>
+    <symbol id="i-lasso" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="8" cy="7" rx="5.5" ry="4" stroke-dasharray="2.5 2"/>
+      <path d="M 10 12.5 Q 11 14 9.5 14.5" stroke-dasharray="2.5 2"/>
+    </symbol>
+    <symbol id="i-knobs" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 5 L9 5"/><path d="M13 5 L14 5"/>
+      <path d="M2 11 L5 11"/><path d="M9 11 L14 11"/>
+      <circle cx="11" cy="5" r="1.8" fill="currentColor" stroke="none"/>
+      <circle cx="7" cy="11" r="1.8" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-chat" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.5 4 A1.5 1.5 0 0 1 4 2.5 H12 A1.5 1.5 0 0 1 13.5 4 V10 A1.5 1.5 0 0 1 12 11.5 H6.5 L4 14 V11.5 A1.5 1.5 0 0 1 2.5 10 Z"/>
+    </symbol>
+    <symbol id="i-revert" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 8 A 5 5 0 1 1 8 13"/>
+      <path d="M3 4 L 3 8 L 7 8"/>
+    </symbol>
+    <symbol id="i-db" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="8" cy="3.5" rx="5" ry="1.8"/>
+      <path d="M3 3.5 V 12.5 A 5 1.8 0 0 0 13 12.5 V 3.5"/>
+      <path d="M3 8 A 5 1.8 0 0 0 13 8"/>
+    </symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 8 L13 8 M9 4 L13 8 L9 12"/>
+    </symbol>
+    <symbol id="i-cursor" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 3 L4 14 L7 11 L9.3 14.3 L11 13.3 L8.7 10 L13 10 Z"/>
+    </symbol>
+    <symbol id="i-region" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1" stroke-dasharray="2.5 2"/>
+    </symbol>
+    <symbol id="i-select" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.2 3.2 L3.2 12.2 L6 9.6 L8 13.5 L9.7 12.7 L7.7 8.9 L12.5 8.9 Z"/>
+    </symbol>
+    <symbol id="i-eye" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 8 C 3 4 6 3 8 3 C 10 3 13 4 15 8 C 13 12 10 13 8 13 C 6 13 3 12 1 8 Z"/>
+      <circle cx="8" cy="8" r="2.2"/>
+    </symbol>
+    <symbol id="i-github" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2 .37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+    </symbol>
+    <symbol id="i-menu" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+      <path d="M3 5 L13 5 M3 8 L13 8 M3 11 L13 11"/>
+    </symbol>
+    <symbol id="i-zap" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 1 L2 9 L7 9 L5 15 L14 7 L9 7 Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================ NAV ============================ -->
+<header class="nav" id="nav">
+  <div class="container">
+    <a class="brand" href="#">
+      <span class="logo-mark"><svg viewBox="0 0 32 32"><defs><linearGradient id="navg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8691F0"/><stop offset="100%" stop-color="#5E6AD2"/></linearGradient></defs><rect width="32" height="32" rx="0" fill="#0a0a12" stroke="#5E6AD2" stroke-width="1"/><path d="M16 26 C 16 26 8 18 8 12 A 8 8 0 0 1 24 12 C 24 18 16 26 16 26 Z" fill="url(#navg)"/><circle cx="16" cy="12" r="3" fill="#BFFF00"/></svg></span>
+      <span>UIPEN</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#install">Download</a>
+    </nav>
+    <div class="cta-group">
+      <button class="chaos-btn" id="chaosBtn" aria-pressed="false"><svg width="10" height="10" style="vertical-align:-1px;margin-right:6px"><use href="#i-zap"/></svg>Chaos</button>
+      <a class="btn primary sm" href="#pricing">Buy $29 <svg><use href="#i-arrow-right"/></svg></a>
+    </div>
+    <button class="nav-toggle" aria-label="Toggle menu" id="navToggle"><svg width="18" height="18"><use href="#i-menu"/></svg></button>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="container">
+    <div class="term-prompt reveal">
+      <span class="arrow">&gt;</span> <span id="typed">UIpen_$ init</span> <span class="blink"></span>
+    </div>
+    <h1 class="reveal">
+      <span class="l">Point at your app.</span>
+      <span class="l l2">Claude fixes it.</span>
+    </h1>
+    <p class="lede reveal">
+      A dev-mode annotation layer for <strong>React</strong>, <strong>Next</strong>, <strong>Astro</strong>, <strong>Vue</strong>, and <strong>Svelte</strong>. Pin the thing that's off, Ctrl+click a <span class="accent">multi-selection</span>, ask for <span class="accent">token-aware knobs</span>. Every annotation ships with the DOM selector, source file, and exact line — straight into your Claude Code session via Anthropic Channels. No screenshots, no pointing at pixels, no cloud.
+    </p>
+
+    <div class="cta-row reveal">
+      <a class="btn primary magnetic" href="#pricing">Buy — $29 one-time <svg><use href="#i-arrow-right"/></svg></a>
+      <a class="btn ghost magnetic" href="#how">See how it works</a>
+      <div class="keys"><span>tools:</span> <kbd>P</kbd> <kbd>R</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>K</kbd> <kbd>H</kbd></div>
+    </div>
+
+    <div class="hero-demo reveal">
+      <div class="hud">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <span class="url">http://localhost:3000/dashboard</span>
+        <span class="meta"><span class="live"></span>UIPEN_ACTIVE</span>
+      </div>
+      <div class="stage">
+        <div class="mock c1"><h4>NAV</h4><div class="num">$2.48M</div><div class="delta">+1.82%</div></div>
+        <div class="mock c2"><h4>DELTA</h4><div class="num">0.412</div><div class="delta neg">−0.08</div></div>
+        <div class="mock c3"><h4>VEGA</h4><div class="num">412.7</div><div class="delta">+3.2</div></div>
+        <div class="mock c4">
+          <h4>SESSION TREND</h4>
+          <div class="mock-chart">
+            <div class="bar" style="height:30%"></div><div class="bar" style="height:55%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:75%"></div><div class="bar" style="height:60%"></div><div class="bar" style="height:92%"></div><div class="bar" style="height:80%"></div><div class="bar" style="height:100%"></div><div class="bar" style="height:78%"></div><div class="bar" style="height:88%"></div>
+          </div>
+        </div>
+        <div class="toolbar-demo">
+          <div class="tb"><svg><use href="#i-cursor"/></svg></div>
+          <div class="tb active"><svg><use href="#i-pin"/></svg></div>
+          <div class="tb"><svg><use href="#i-region"/></svg></div>
+          <div class="tb"><svg><use href="#i-arrow-right"/></svg></div>
+          <div class="tb"><svg><use href="#i-select"/></svg></div>
+          <div class="tb"><svg><use href="#i-knobs"/></svg></div>
+          <div class="tb"><svg><use href="#i-eye"/></svg></div>
+        </div>
+        <div class="pin p1"><span>1</span></div>
+        <div class="pin p2"><span>2</span></div>
+        <div class="pin p3"><span>3</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FEATURES ============================ -->
+<section id="features">
+  <div class="container">
+    <div class="eyebrow reveal">01 // What it is</div>
+    <h2 class="reveal">A precision instrument.<br/><span class="hl-m">Not a comment box.</span></h2>
+    <p class="section-lede reveal">Every annotation carries the DOM selector, the React fiber <code style="font-family:var(--font-mono);color:var(--neon-g)">_debugSource</code> (file + line + component), and the computed styles. Claude edits the exact spot — no guessing from pixel coordinates, no re-scanning the whole file.</p>
+
+    <div class="features-grid">
+      <div class="card span-4 tall reveal">
+        <span class="num">01</span>
+        <div class="icon"><svg><use href="#i-pin"/></svg></div>
+        <h3>Seven tools,<br/>one gesture</h3>
+        <p>Pin a point. Drag a region. Draw an arrow between two elements. Snap to a single component. Ctrl+click to multi-select. Ask for knobs. Or press <kbd style="font-family:var(--font-mono);font-size:10px;padding:2px 6px;background:var(--void);border:1px solid var(--border-strong);color:var(--neon-g);border-radius:2px">Shift+H</kbd> to hide the entire overlay and review your app clean.</p>
+        <div class="kbd-row">
+          <kbd>V</kbd> <kbd>P</kbd> <kbd>R</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>K</kbd> <kbd>H</kbd>
+        </div>
+        <div class="pins-viz">
+          <div class="pv"><div class="dot draft"></div><span class="lbl">draft</span></div>
+          <div class="pv"><div class="dot sent"></div><span class="lbl">sent</span></div>
+          <div class="pv"><div class="dot resolved"></div><span class="lbl">resolved</span></div>
+          <div class="pv"><div class="dot reverted"></div><span class="lbl">reverted</span></div>
+          <div class="pv"><div class="dot failed"></div><span class="lbl">failed</span></div>
+        </div>
+      </div>
+
+      <div class="card span-2 tall accent-m reveal">
+        <span class="num">02</span>
+        <div class="icon"><svg><use href="#i-knobs"/></svg></div>
+        <h3>Design-token-aware knobs</h3>
+        <p>Ask Claude for tunable controls on any element. Sliders, color pickers, toggles — <strong>snapped to your project's Tailwind / CSS tokens</strong>. Drag the scale chips, preview live, apply writes <code style="font-family:var(--font-mono);font-size:11px;color:var(--neon-m)">className="p-4"</code> to source. No ad-hoc <code style="font-family:var(--font-mono);font-size:11px;color:var(--neon-m)">17px</code> leaks.</p>
+        <div class="knob-viz">
+          <div class="k">
+            <div class="label"><span>Radius</span><span class="val">rounded-xl</span></div>
+            <div class="track" style="--w:60%"></div>
+          </div>
+          <div class="k">
+            <div class="label"><span>Padding</span><span class="val">p-6</span></div>
+            <div class="track" style="--w:40%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card span-2 accent-c reveal">
+        <span class="num">03</span>
+        <div class="icon"><svg><use href="#i-chat"/></svg></div>
+        <h3>Threads,<br/>not one-shots</h3>
+        <p>Every annotation expands into a chat. Iterate. Claude streams replies into the bubble — no terminal context-switch.</p>
+        <div class="chat-viz">
+          <div class="bubble u">make it 2px tighter</div>
+          <div class="bubble a typing">setting padding to 10px</div>
+        </div>
+      </div>
+
+      <div class="card span-2 accent-g reveal">
+        <span class="num">04</span>
+        <div class="icon"><svg><use href="#i-revert"/></svg></div>
+        <h3>Reversible<br/>by default</h3>
+        <p>Claude records exactly which files changed. Hit Revert or <kbd style="font-family:var(--font-mono);font-size:10px;padding:2px 6px;background:var(--void);border:1px solid var(--border-strong);color:var(--neon-g);border-radius:2px">⌘Z</kbd> — the last resolved annotation unwinds. LIFO, no merge hell.</p>
+      </div>
+
+      <div class="card span-2 reveal">
+        <span class="num">05</span>
+        <div class="icon"><svg><use href="#i-db"/></svg></div>
+        <h3>Persisted<br/>locally</h3>
+        <p>SQLite under the hood. Refresh the page, restart the session, come back tomorrow — your annotations, resolutions, and threads are still there.</p>
+      </div>
+
+      <div class="card span-4 accent-m reveal">
+        <span class="num">06</span>
+        <div class="icon"><svg><use href="#i-select"/></svg></div>
+        <h3>Ctrl+click multi-select<br/>without the friction</h3>
+        <p>Hold Ctrl (or Cmd on macOS) and click several elements to accumulate a multi-selection. Enter commits, one annotation with N targets. Great for harmonization passes: <em>"make these four labels consistent."</em></p>
+        <div class="lasso-viz">
+          <div class="el"></div>
+          <div class="el"></div>
+          <div class="el"></div>
+        </div>
+      </div>
+
+      <div class="card span-2 accent-g reveal">
+        <span class="num">07</span>
+        <div class="icon"><svg><use href="#i-eye"/></svg></div>
+        <h3>Gets out<br/>of the way</h3>
+        <p>Press <kbd style="font-family:var(--font-mono);font-size:10px;padding:2px 6px;background:var(--void);border:1px solid var(--border-strong);color:var(--neon-g);border-radius:2px">H</kbd> to hide markers, or <kbd style="font-family:var(--font-mono);font-size:10px;padding:2px 6px;background:var(--void);border:1px solid var(--border-strong);color:var(--neon-g);border-radius:2px">Shift+H</kbd> to hide the entire overlay. See your app clean. Press again — state returns exactly as you left it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TRY IT LIVE ============================ -->
+<section id="try" class="try-it">
+  <div class="container">
+    <div class="eyebrow reveal">02 // Try it</div>
+    <h2 class="reveal glitch-on-reveal">See it work.<br/><span class="hl-g">Right here.</span></h2>
+    <p class="section-lede reveal">Pick a tool. Click the sample dashboard below. Watch a fake Claude stream a fake reply and change the UI in place. The pattern is real — only the backend is faked.</p>
+
+    <div class="demo-shell reveal">
+      <div class="demo-toolbar-real">
+        <button class="dt" data-dt="pin" data-active="true" title="Pin (P)"><svg><use href="#i-pin"/></svg></button>
+        <button class="dt" data-dt="region" title="Region (R)"><svg><use href="#i-region"/></svg></button>
+        <button class="dt" data-dt="select" title="Select (S)"><svg><use href="#i-select"/></svg></button>
+        <button class="dt" data-dt="knobs" title="Knobs (K)"><svg><use href="#i-knobs"/></svg></button>
+        <span class="dt-sep"></span>
+        <button class="dt reset-btn" data-dt-action="reset" title="Reset"><svg><use href="#i-revert"/></svg></button>
+      </div>
+      <div class="demo-stage-real" id="demoStage">
+        <div class="demo-target" data-label="Primary button">
+          <button class="sample-btn">Click me</button>
+        </div>
+        <div class="demo-target" data-label="Price tag">
+          <span class="sample-price">$129.00</span>
+        </div>
+        <div class="demo-target" data-label="Label">
+          <div class="sample-label">Quarterly revenue</div>
+        </div>
+        <div class="demo-target wide" data-label="Card">
+          <div class="sample-card">
+            <h5>Alpha / Beta</h5>
+            <p>Risk-adjusted exposure. Computed from the 30-day rolling window.</p>
+          </div>
+        </div>
+        <div class="demo-ghost">click the pin tool, then click an element</div>
+      </div>
+      <div class="demo-sidebar">
+        <div class="demo-head">
+          <span class="demo-dot"></span>
+          <span>UIPEN_THREAD</span>
+          <span class="demo-badge" id="demoBadge">idle</span>
+        </div>
+        <div class="demo-log" id="demoLog">
+          <div class="log-line muted">&gt; waiting for annotation...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HOW IT WORKS ============================ -->
+<section id="how">
+  <div class="container">
+    <div class="eyebrow reveal">02 // Architecture</div>
+    <h2 class="reveal">One script tag.<br/><span class="hl-g">One MCP channel.</span></h2>
+    <p class="section-lede reveal">The overlay injects into your dev page via a shadow-DOM script. The server is a single Bun process that binds :8787 and wires stdio to Claude Code via MCP. No extensions. No cloud. No accounts.</p>
+
+    <div class="flow">
+      <div class="step reveal" data-step="01">
+        <div class="num">01 // BROWSER</div>
+        <h4>Annotate</h4>
+        <p>Shadow-DOM overlay captures the annotation, extracts target metadata, POSTs it.</p>
+        <div class="code"><span class="c-muted">POST</span> /annotations<br/><span class="c-accent">&lt;selector, file:line, computed&gt;</span></div>
+      </div>
+      <div class="step reveal" data-step="02">
+        <div class="num">02 // SERVER</div>
+        <h4>Channel</h4>
+        <p>Bun + SQLite + MCP stdio. Broadcasts to Claude as a <code style="font-family:var(--font-mono);font-size:12px;color:var(--neon-c)">notifications/claude/channel</code>.</p>
+        <div class="code"><span class="c-muted">notify</span> → <span class="c-accent">&lt;channel source="uipen"&gt;</span></div>
+      </div>
+      <div class="step reveal" data-step="03">
+        <div class="num">03 // CLAUDE</div>
+        <h4>Edit</h4>
+        <p>Edits the file at the right line. Calls <code style="font-family:var(--font-mono);font-size:12px;color:var(--neon-m)">resolve_annotation</code> with the files it touched — so revert knows what to undo.</p>
+        <div class="code"><span class="c-muted">resolve</span>(<span class="c-m">id</span>, <span class="c-accent">files_changed</span>)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PRICING ============================ -->
+<section id="pricing">
+  <div class="container">
+    <div class="eyebrow reveal">03 // Pricing</div>
+    <h2 class="reveal">One price.<br/><span class="hl-m">No subscription.</span></h2>
+    <p class="section-lede reveal">Buy once, own it. Every UIpen 1.x update is free for the next 12 months. Upgrade to major versions later for 50% off — or don't; your copy keeps working on the version you bought, forever.</p>
+
+    <div class="pricing-grid reveal">
+      <div class="price-card">
+        <div class="price-head">
+          <div class="price-tier">UIpen — Personal</div>
+          <div class="price-amount">$29<span class="price-unit"> one-time</span></div>
+        </div>
+        <ul class="price-list">
+          <li><span class="tick">✓</span> Full UIpen — all tools, all frameworks</li>
+          <li><span class="tick">✓</span> 12 months of free 1.x updates</li>
+          <li><span class="tick">✓</span> 3 machine activations</li>
+          <li><span class="tick">✓</span> Works offline after activation</li>
+          <li><span class="tick">✓</span> 50% off future major-version upgrades</li>
+          <li><span class="tick">✓</span> Email support on bugs</li>
+        </ul>
+        <a class="btn primary magnetic price-cta" href="#install">Buy — $29 <svg><use href="#i-arrow-right"/></svg></a>
+        <div class="price-note">Paid via Polar.sh. Secure, instant, worldwide. Refund within 14 days.</div>
+      </div>
+
+      <div class="price-why">
+        <h3>Why one-time, not subscription</h3>
+        <p>Subscription tools go dark when you stop paying. UIpen doesn't. You own the version you bought — forever. When a new major ships (every ~18 months) with meaningful new features, you decide whether to upgrade.</p>
+        <h3 style="margin-top: 22px">Need more than 3 machines?</h3>
+        <p>Team and enterprise licenses (site-wide seat counts, SSO, priority support) ship later in 2026. <a href="mailto:hi@uipen.dev">Email for early access.</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SHORTCUTS ============================ -->
+<section>
+  <div class="container">
+    <div class="eyebrow reveal">04 // Muscle memory</div>
+    <h2 class="reveal">Keyboard-first.<br/><span class="hl-c">Always.</span></h2>
+    <p class="section-lede reveal">Every tool and action has a single-letter shortcut. Send a single annotation, batch many, revert the last one — it all fits in two keys.</p>
+
+    <div class="shortcuts-grid">
+      <div class="s"><kbd>V</kbd><span class="desc">Cursor / passthrough</span></div>
+      <div class="s"><kbd>P</kbd><span class="desc">Pin</span></div>
+      <div class="s"><kbd>R</kbd><span class="desc">Region</span></div>
+      <div class="s"><kbd>A</kbd><span class="desc">Arrow</span></div>
+      <div class="s"><kbd>S</kbd><span class="desc">Select element</span></div>
+      <div class="s"><kbd>⌘/Ctrl + click</kbd><span class="desc">Multi-select (during S)</span></div>
+      <div class="s"><kbd>K</kbd><span class="desc">Request knobs</span></div>
+      <div class="s"><kbd>H</kbd><span class="desc">Hide markers on page</span></div>
+      <div class="s"><kbd>Shift + H</kbd><span class="desc">Hide entire overlay</span></div>
+      <div class="s"><kbd>Alt + scroll</kbd><span class="desc">Cycle stacked elements</span></div>
+      <div class="s"><kbd>Enter</kbd><span class="desc">Send this one</span></div>
+      <div class="s"><kbd>⌘/Ctrl + Enter</kbd><span class="desc">Save for batch</span></div>
+      <div class="s"><kbd>⌘/Ctrl + Z</kbd><span class="desc">Revert last resolved</span></div>
+      <div class="s"><kbd>Esc</kbd><span class="desc">Cancel / close panel</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DOWNLOAD / INSTALL ============================ -->
+<section id="install">
+  <div class="container">
+    <div class="eyebrow reveal">05 // Download &amp; install</div>
+    <h2 class="reveal">Sixty seconds.<br/><span class="hl-m">Two commands.</span></h2>
+    <p class="section-lede reveal">Download the installer for your OS, run <code style="font-family:var(--font-mono);color:var(--neon-g)">uipen init</code> from your project, launch Claude with the channel flag. Done.</p>
+
+    <!-- Platform downloads -->
+    <div class="downloads reveal">
+      <a class="dl-card" data-os="windows" href="#" id="dl-win">
+        <div class="dl-os">Windows</div>
+        <div class="dl-file">uipen-setup-x64.exe</div>
+        <div class="dl-note">user-scope installer · no admin required</div>
+      </a>
+      <a class="dl-card" data-os="macos" href="#" id="dl-mac">
+        <div class="dl-os">macOS</div>
+        <div class="dl-file">UIpen.dmg</div>
+        <div class="dl-note">Apple Silicon &amp; Intel · drag to Applications</div>
+      </a>
+      <a class="dl-card" data-os="linux" href="#" id="dl-linux">
+        <div class="dl-os">Linux</div>
+        <div class="dl-file">uipen-x86_64.AppImage</div>
+        <div class="dl-note">chmod +x &amp; run · any modern distro</div>
+      </a>
+    </div>
+    <p class="dl-meta reveal">
+      Buy your license at <a href="#pricing">$29 one-time</a>. Already bought? Your same license activates every download — grab the latest anytime.
+    </p>
+
+    <!-- After install -->
+    <div class="install-panel reveal">
+      <div class="note"><span class="step-num">1</span> After the installer finishes, open a new shell. From your project directory:</div>
+      <pre><button class="copy" data-copy>copy</button><code><span class="tok-c"># Auto-detects your framework (Next / Astro / Vue / Svelte / Vite),
+# writes .mcp.json, and injects the overlay script in the right layout.</span>
+uipen init</code></pre>
+
+      <div class="note"><span class="step-num">2</span> Launch Claude Code with the channel flag:</div>
+      <pre><button class="copy" data-copy>copy</button><code>claude --dangerously-load-development-channels server:uipen</code></pre>
+
+      <div class="note"><span class="step-num">3</span> Start your dev server (<code style="font-family:var(--font-mono);color:var(--neon-c)">npm run dev</code> / <code style="font-family:var(--font-mono);color:var(--neon-c)">bun dev</code>), hard-refresh the browser. The overlay appears top-right. That's it.</div>
+    </div>
+
+    <p class="install-footnote reveal">
+      Windows: accept the SmartScreen "protected your PC" warning — "More info" → "Run anyway" — until we ship code-signing in a future release. macOS: first launch needs right-click → Open to bypass Gatekeeper. Linux: make the AppImage executable with <code style="font-family:var(--font-mono);color:var(--neon-c)">chmod +x</code>.
+    </p>
+  </div>
+</section>
+
+<!-- ============================ STATS STRIP ============================ -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid reveal">
+      <div class="stat">
+        <div class="stat-val" data-count="8787">0</div>
+        <div class="stat-label">TCP port for the MCP channel</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="7">0</div>
+        <div class="stat-label">Tools — pin, region, arrow, select, multi, knobs, hide</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="0">0</div>
+        <div class="stat-label">Cloud calls, accounts required, vendors in the loop</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" data-count="60" data-suffix="s">0</div>
+        <div class="stat-label">From install to first annotation</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FINAL CTA ============================ -->
+<section class="final-cta">
+  <div class="container">
+    <div class="reveal">
+      <h2>Stop pointing at pixels.<br/>Start pointing at <span class="hl-m">code.</span></h2>
+      <p>$29 one-time. 12 months of updates. Works in React, Next, Astro, Vue, Svelte.</p>
+      <div class="cta-line">
+        <a class="btn primary magnetic" href="#pricing">Buy — $29 <svg><use href="#i-arrow-right"/></svg></a>
+        <a class="btn ghost magnetic" href="#install">Download</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer>
+  <div class="container">
+    <div class="brand-line">
+      <span class="logo-mark"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="0" fill="#0a0a12" stroke="#5E6AD2" stroke-width="1"/><path d="M16 26 C 16 26 8 18 8 12 A 8 8 0 0 1 24 12 C 24 18 16 26 16 26 Z" fill="#5E6AD2"/><circle cx="16" cy="12" r="3" fill="#BFFF00"/></svg></span>
+      <span>UIPEN / v0.1.0</span>
+      <span style="color:var(--fg-ghost);margin-left:10px">// BUILT ON CLAUDE CODE CHANNELS</span>
+    </div>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#install">Download</a>
+      <a href="mailto:hi@uipen.dev">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<!-- chaos mode banner -->
+<div class="chaos-banner">▲ CHAOS MODE ENGAGED ▲</div>
+
+<!-- Terminal console (press ` or ~ to toggle) -->
+<div class="term-console" id="termConsole" aria-hidden="true">
+  <div class="term-head">
+    <span class="term-title"><span class="term-live"></span> UIPEN_$ — /dev/null tty0</span>
+    <span class="term-hint">Press <kbd>`</kbd> to toggle · <kbd>Esc</kbd> to close · try: <kbd>help</kbd></span>
+    <button class="term-x" id="termClose" aria-label="Close terminal">×</button>
+  </div>
+  <div class="term-body" id="termBody"></div>
+  <div class="term-prompt-row">
+    <span class="term-prefix">uipen_$</span>
+    <input class="term-input" id="termInput" autocomplete="off" spellcheck="false" />
+    <span class="term-caret"></span>
+  </div>
+</div>
+
+<!-- Click ripple layer -->
+<div class="ripple-layer" id="rippleLayer" aria-hidden="true"></div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
