@@ -40,12 +40,14 @@ jobs:
           enablement: true
 
       - name: verify site structure
-        # Fail fast if the three required files aren't present so a
-        # broken commit doesn't ship silently.
+        # Fail fast if a required file isn't present so a broken commit
+        # doesn't ship silently. script.js was dropped here when the homepage
+        # became self-contained: it had gone to 33 KB that no page loaded, and
+        # a guard that insists on a dead file only teaches people to delete
+        # the guard.
         run: |
           test -s index.html
           test -s styles.css
-          test -s script.js
           test -s CNAME
           echo "site files present:"
           ls -la
