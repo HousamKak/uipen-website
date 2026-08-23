@@ -2,7 +2,7 @@
 // Renders content/changelog/*.md into a single /changelog/index.html page.
 //
 // Source:   content/changelog/<slug>.md  (frontmatter: date, title, tag, slug)
-// Output:   changelog/index.html          (gitignored — rebuilt in CI)
+// Output:   changelog/index.html          (gitignored, rebuilt in CI)
 //
 // Entries sort by `date` descending. Each entry gets an anchor id `<slug>` so
 // URLs are shareable.
@@ -68,7 +68,7 @@ const page = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Changelog — UIpen</title>
+<title>Changelog &middot; UIpen</title>
 <meta name="description" content="UIpen releases and notes." />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:title" content="UIpen Changelog" />
@@ -80,7 +80,7 @@ const page = `<!doctype html>
 <body class="cl-page">
   <header class="cl-header">
     <a class="brand" href="/">
-      <span class="logo-mark"><svg viewBox="0 0 64 64"><defs><linearGradient id="clg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8691F0"/><stop offset="100%" stop-color="#5E6AD2"/></linearGradient></defs><path d="M32 8 L52 44 L32 56 L12 44 Z" fill="url(#clg)"/><path d="M32 8 L32 54" stroke="#0a0a12" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="56" r="5" fill="#BFFF00"/></svg></span>
+      <span class="logo-mark"><svg viewBox="0 0 64 64"><defs><linearGradient id="clg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8691F0"/><stop offset="100%" stop-color="#5E6AD2"/></linearGradient></defs><path d="M32 8 L52 44 L32 56 L12 44 Z" fill="url(#clg)"/><path d="M32 8 L32 54" stroke="#16150F" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="56" r="5" fill="#5E6AD2"/></svg></span>
       <span>UIPEN</span>
     </a>
     <a class="cl-back" href="/">← Home</a>
@@ -100,7 +100,7 @@ ${entriesHtml}
     <span class="cl-foot-sep">·</span>
     <a href="https://github.com/HousamKak/uipen" rel="noopener">GitHub</a>
     <span class="cl-foot-sep">·</span>
-    <a href="/#pricing">Buy — $29</a>
+    <a href="/#/pricing">Buy, $15</a>
   </footer>
 </body>
 </html>
