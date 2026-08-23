@@ -32,7 +32,22 @@ jobs:
           }
 
       - name: JS syntax check
-        run: node --check script.js
+        # The homepage's script is inline now (one router, a dozen lines), so
+        # there is no standalone file to check. Extract the inline blocks and
+        # check those instead, which is strictly more coverage than the old
+        # single-file check: it catches a syntax error in the thing that
+        # actually ships.
+        run: |
+          fail=0
+          for f in index.html thanks/index.html; do
+            [ -f "$f" ] || continue
+            awk '/<script>/{flag=1;next} /<\/script>/{flag=0} flag' "$f" > /tmp/inline.js
+            if [ -s /tmp/inline.js ]; then
+              node --check /tmp/inline.js || { echo "syntax error in $f"; fail=1; }
+            fi
+          done
+          node --check scripts/build-changelog.mjs || fail=1
+          exit $fail
 
       - name: CSS sanity (file exists and parses as valid length)
         run: |
